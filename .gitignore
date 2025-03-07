@@ -1,0 +1,31 @@
+# Virtual environment & dependencies
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+
+# Environment variables
+.env
+.env.local
+
+# Database & migrations
+*.sqlite3
+migrations/
+
+# Logs & cache
+*.log
+logs/
+cache/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Ignore raw and processed data files
+data/
+notebooks/
+
+# Ignore any data import scripts that are only for local use
+import_data.py
