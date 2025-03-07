@@ -15,10 +15,12 @@ def create_response(
         message (str): A brief message describing the response.
         data (Optional[Any]): The response data (default is None).
         status_code (int): The HTTP status code (default is 200).
-        location (Optional[str]): A URL to be included in the 'Location' header (default is None).
+        location (Optional[str]): A URL to be included in the 'Location' header
+        (default is None).
 
     Returns:
-        JSONResponse: A FastAPI JSON response with the provided message, data, and headers.
+        JSONResponse: A FastAPI JSON response with the provided message, data,
+        and headers.
     """
     headers: Dict[str, str] = {}
 
