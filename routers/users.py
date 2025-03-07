@@ -33,6 +33,9 @@ async def create_user(db: db_dependency, request: UserRequest):
 
     Returns:
         JSONResponse: Success message and registered user data.
+
+    Raises:
+        HTTPException: If the user exists.
     """
 
     # Check if the user already exists by email or username
