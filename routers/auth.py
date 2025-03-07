@@ -4,7 +4,7 @@ from typing import Annotated, Dict
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 from starlette import status
 
@@ -16,6 +16,7 @@ ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 token_dependency = Annotated[OAuth2PasswordRequestForm, Depends()]
+bearer_dependency = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="/auth/login"))]
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -58,6 +59,28 @@ def create_access_token(user_id: int, username: str, user_role: str,
     token: str = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
     return token
+
+
+async def get_current_user(token: bearer_dependency):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        id: int = payload.get("id")
+        role: str = payload.get("role")
+        if id is None or username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Could not validate credentials")
+        return {
+            "id": id,
+            "username": username,
+            "role": role
+        }
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Could not validate credentials")
+
+
+user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 @router.post("/login", response_model=Token, status_code=status.HTTP_201_CREATED)

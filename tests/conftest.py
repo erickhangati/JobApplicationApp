@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from database import Base, get_db
 from main import app
 from models import Users
-from routers.auth import bcrypt_context
+from routers.auth import bcrypt_context, get_current_user
 
 load_dotenv()
 
@@ -62,5 +62,6 @@ def test_user():
 
 
 app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_current_user] = override_get_current_user
 
 client = TestClient(app)

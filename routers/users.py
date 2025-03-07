@@ -5,7 +5,7 @@ users.py - Handles user registration and related operations in the FastAPI appli
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from .auth import bcrypt_context  # Import password hashing context
+from .auth import bcrypt_context, user_dependency  # Import password hashing context
 from models import UserRequest, Users, UserRequestBase  # Import models
 from database import db_dependency  # Import database dependency
 from utils import create_response  # Import response utility function
@@ -81,3 +81,45 @@ async def create_user(db: db_dependency, request: UserRequest):
         status_code=status.HTTP_201_CREATED,
         location=f"/users/{user.id}"
     )
+
+
+@router.get("/me", response_model=UserRequestBase, status_code=status.HTTP_200_OK)
+async def read_user(db: db_dependency, request: user_dependency):
+    """
+    Retrieves the authenticated user's profile.
+
+    Args:
+        db (Session): Database session dependency.
+        request (dict): Dictionary containing user details from JWT token.
+
+    Returns:
+        UserRequestBase: User profile data (excluding password).
+
+    Raises:
+        HTTPException: If the user is not found.
+
+    Example:
+        Request (Authenticated):
+            GET /users/me
+
+        Response:
+            {
+                "first_name": "John",
+                "last_name": "Doe",
+                "username": "johndoe",
+                "email": "johndoe@email.com",
+                "role": "USER"
+            }
+    """
+
+    # Fetch the user from the database using the ID from the JWT token
+    user = db.query(Users).filter(Users.id == request.get("id")).first()
+
+    # Raise error if user is not found
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found."
+        )
+
+    return user
