@@ -122,4 +122,19 @@ async def read_user(db: db_dependency, request: user_dependency):
             detail="User not found."
         )
 
-    return user
+    # Prepare structured response
+    user_data = {
+        "id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "username": user.username,
+        "email": user.email,
+        "role": user.role,
+    }
+
+    return create_response(
+        message="User profile retrieved successfully.",
+        data=user_data,
+        status_code=status.HTTP_200_OK
+    )
+

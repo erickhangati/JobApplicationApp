@@ -1,11 +1,13 @@
 from fastapi.responses import JSONResponse
 from typing import Any, Dict, Optional
 
+from starlette import status
+
 
 def create_response(
         message: str,
         data: Optional[Any] = None,
-        status_code: int = 200,
+        status_code: int = status.HTTP_200_OK,
         location: Optional[str] = None
 ) -> JSONResponse:
     """
