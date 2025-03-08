@@ -35,14 +35,6 @@ def create_access_token(user_id: int, username: str, user_role: str,
 
     Returns:
         str: Encoded JWT access token.
-
-    Example:
-        >>> create_access_token(1, "johndoe", "USER", timedelta(hours=1))
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-
-    Notes:
-        - The token includes an expiration (`exp`) claim to prevent indefinite use.
-        - Ensure `SECRET_KEY` is stored securely (e.g., environment variables).
     """
 
     # Set expiration time (UTC)
@@ -98,19 +90,6 @@ async def create_token(db: db_dependency, user_request: token_dependency):
 
     Raises:
         HTTPException: If the user is not found or the password is incorrect.
-
-    Example:
-        Request:
-            {
-                "username": "johndoe",
-                "password": "test1234"
-            }
-
-        Response:
-            {
-                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                "token_type": "bearer"
-            }
     """
 
     # Fetch the user by username

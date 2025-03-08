@@ -97,19 +97,6 @@ async def read_user(db: db_dependency, request: user_dependency):
 
     Raises:
         HTTPException: If the user is not found.
-
-    Example:
-        Request (Authenticated):
-            GET /users/me
-
-        Response:
-            {
-                "first_name": "John",
-                "last_name": "Doe",
-                "username": "johndoe",
-                "email": "johndoe@email.com",
-                "role": "USER"
-            }
     """
 
     # Fetch the user from the database using the ID from the JWT token
@@ -158,20 +145,6 @@ async def update_user(
 
     Raises:
         HTTPException: If the user is not found.
-
-    Example:
-        Request:
-            PUT /users/me
-            {
-                "first_name": "Jane",
-                "last_name": "Doe",
-                "username": "janedoe",
-                "email": "janedoe@email.com",
-                "role": "ADMIN"
-            }
-
-        Response:
-            Status Code: 204 No Content
     """
 
     # Fetch the user from the database using the ID from the JWT token

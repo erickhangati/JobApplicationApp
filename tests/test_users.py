@@ -37,7 +37,7 @@ def test_create_user(test_user):
 
     # Assertions for response validation
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.json()["message"] == "User successfully registered."
+    assert response.json()["message"] == "User successfully registered"
     assert "data" in response.json()
 
     # Validate that the user exists in the database
@@ -95,13 +95,16 @@ def test_read_user(test_user):
         headers={"Authorization": f"Bearer {token}"}
     )
 
+    # Extract user data from response
+    response_data = response.json()["data"]
+
     # Assertions
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["username"] == "jane_doe"
-    assert response.json()["email"] == "janedoe@mail.com"
-    assert response.json()["role"] == "ADMIN"
-    assert response.json()["first_name"] == "Jane"
-    assert response.json()["last_name"] == "Doe"
+    assert response_data["username"] == "jane_doe"
+    assert response_data["email"] == "janedoe@mail.com"
+    assert response_data["role"] == "ADMIN"
+    assert response_data["first_name"] == "Jane"
+    assert response_data["last_name"] == "Doe"
 
 
 def test_read_user_not_found():
@@ -128,5 +131,5 @@ def test_read_user_not_found():
 
     # Assert that the response returns a 404 NOT FOUND
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json()["detail"] == "User not found."
+    assert response.json()["detail"] == "User not found"
 
