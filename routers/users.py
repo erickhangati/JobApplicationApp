@@ -46,7 +46,7 @@ async def create_user(db: db_dependency, request: UserRequest):
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email or username already registered."
+            detail="Email or username already registered"
         )
 
     # Create a new user instance
@@ -76,7 +76,7 @@ async def create_user(db: db_dependency, request: UserRequest):
 
     # Return structured response using utility function
     return create_response(
-        message="User successfully registered.",
+        message="User successfully registered",
         data=user_data,
         status_code=status.HTTP_201_CREATED,
         location=f"/users/{user.id}"
@@ -119,7 +119,7 @@ async def read_user(db: db_dependency, request: user_dependency):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found."
+            detail="User not found"
         )
 
     # Prepare structured response
@@ -133,8 +133,64 @@ async def read_user(db: db_dependency, request: user_dependency):
     }
 
     return create_response(
-        message="User profile retrieved successfully.",
+        message="User profile retrieved successfully",
         data=user_data,
         status_code=status.HTTP_200_OK
     )
 
+
+@router.put("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def update_user(
+        db: db_dependency,
+        request: user_dependency,
+        update: UserRequestBase
+):
+    """
+    Updates the authenticated user's profile.
+
+    Args:
+        db (Session): SQLAlchemy database session dependency.
+        request (dict): Dictionary containing user details from the JWT token.
+        update (UserRequestBase): Pydantic model containing updated user details.
+
+    Returns:
+        None: Returns HTTP 204 No Content on success.
+
+    Raises:
+        HTTPException: If the user is not found.
+
+    Example:
+        Request:
+            PUT /users/me
+            {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "username": "janedoe",
+                "email": "janedoe@email.com",
+                "role": "ADMIN"
+            }
+
+        Response:
+            Status Code: 204 No Content
+    """
+
+    # Fetch the user from the database using the ID from the JWT token
+    user = db.query(Users).filter(Users.id == request.get("id")).first()
+
+    # Raise an error if the user does not exist
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Update the user fields with the new values
+    user.first_name = update.first_name
+    user.last_name = update.last_name
+    user.username = update.username
+    user.email = update.email
+    user.role = update.role
+
+    # Commit changes to the database
+    db.commit()
+    db.refresh(user)

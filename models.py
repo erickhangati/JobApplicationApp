@@ -167,6 +167,18 @@ class UserRequestBase(BaseModel):
     email: str = Field(min_length=3, description='Email')
     role: str = Field(min_length=3, description='Role')
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "first_name": "Alice",
+                "last_name": "Smith",
+                "username": "alicesmith",
+                "email": "alice@example.com",
+                "role": "USER"
+            }
+        }
+    }
+
 
 class UserRequest(UserRequestBase):
     """Schema for user registration requests."""

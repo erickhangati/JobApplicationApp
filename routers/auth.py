@@ -10,6 +10,7 @@ from starlette import status
 
 from database import db_dependency
 from models import Token, Users
+from utils import create_response
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ALGORITHM = 'HS256'
@@ -129,5 +130,4 @@ async def create_token(db: db_dependency, user_request: token_dependency):
     token = create_access_token(user_id=user.id, username=user.username,
                                 user_role=user.role, expire=timedelta(minutes=60))
 
-    # Return access token
     return {"access_token": token, "token_type": "bearer"}
