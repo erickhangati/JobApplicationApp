@@ -186,3 +186,155 @@ def test_update_user_not_exist():
     # Assertions
     assert response.status_code == status.HTTP_404_NOT_FOUND  # Expect 404 Not Found
     assert response.json()["detail"] == "User not found"  # Ensure correct error message
+
+
+def test_user_change_password(test_user):
+    """
+    Tests the password change functionality for an authenticated user.
+
+    Steps:
+    - Sends a valid old password and a new password for update.
+    - Asserts that the request is successful with a 204 status code.
+    - Fetches the user from the test database and verifies that the new password is correctly hashed.
+
+    Args:
+        test_user (Users): A fixture representing the authenticated test user.
+    """
+
+    # Define the password update payload
+    payload = {
+        "old_password": "test1234",
+        "new_password": "test4321",
+        "confirm_password": "test4321"
+    }
+
+    # Generate a valid JWT token for the authenticated user
+    _, token = access_token()
+
+    # Send PUT request to update the user's password
+    response = client.put(
+        "/users/me/change-password",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload
+    )
+
+    # Assert successful password change (204 No Content means no response body)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    # Verify that the password has been updated in the database
+    db = TestSessionLocal()
+    user = db.query(Users).filter(Users.id == 1).first()
+
+    # Ensure the new password is correctly hashed and stored
+    assert bcrypt_context.verify(payload["new_password"], user.hashed_password)
+
+
+def test_user_change_password_not_exist():
+    """
+    Tests password change for a non-existent user.
+
+    Steps:
+    - Generates an access token for a user ID that does not exist.
+    - Attempts to update the password using the generated token.
+    - Asserts that the request fails with a 404 Not Found status.
+    - Ensures the error message states "User not found".
+
+    Expected Behavior:
+    - The system should prevent unauthorized password changes for non-existent users.
+
+    """
+
+    # Define the password update payload
+    payload = {
+        "old_password": "test1234",
+        "new_password": "test4321",
+        "confirm_password": "test4321"
+    }
+
+    # Generate an access token for a non-existent user
+    _, token = access_token()
+
+    # Send a PUT request to update the password
+    response = client.put(
+        "/users/me/change-password",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload
+    )
+
+    # Assert failure due to user not existing
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"] == "User not found"
+
+
+def test_user_change_password_wrong_old_password(test_user):
+    """
+    Tests password change with an incorrect old password.
+
+    Steps:
+    - Generates an access token for an existing user.
+    - Sends a request with an incorrect old password.
+    - Asserts that the request fails with a 400 Bad Request status.
+    - Ensures the error message states "Wrong old password".
+
+    Expected Behavior:
+    - The system should reject password change attempts if the old password does not
+    match the stored password.
+    """
+
+    # Define the password update payload with an incorrect old password
+    payload = {
+        "old_password": "wrong_old_password",  # Incorrect old password
+        "new_password": "test4321",
+        "confirm_password": "test4321"
+    }
+
+    # Generate an access token for the test user
+    _, token = access_token()
+
+    # Send a PUT request to attempt changing the password
+    response = client.put(
+        "/users/me/change-password",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload
+    )
+
+    # Assert failure due to incorrect old password
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == "Wrong old password"
+
+
+def test_user_change_password_dont_match(test_user):
+    """
+    Tests password change with mismatched new and confirm passwords.
+
+    Steps:
+    - Generates an access token for an existing user.
+    - Sends a request where `new_password` and `confirm_password` do not match.
+    - Asserts that the request fails with a 400 Bad Request status.
+    - Ensures the error message states "Passwords do not match".
+
+    Expected Behavior:
+    - The system should reject password change requests where `new_password`
+      and `confirm_password` do not match.
+    """
+
+    # Define the password update payload with mismatched passwords
+    payload = {
+        "old_password": "test1234",  # Correct old password
+        "new_password": "test4321",
+        "confirm_password": "password_dont_match"  # Mismatched confirmation
+    }
+
+    # Generate an access token for the test user
+    _, token = access_token()
+
+    # Send a PUT request to attempt changing the password
+    response = client.put(
+        "/users/me/change-password",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload
+    )
+
+    # Assert failure due to mismatched new and confirm passwords
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["detail"] == "Passwords do not match"
