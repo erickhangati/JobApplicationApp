@@ -4,6 +4,7 @@ from starlette import status
 from models import Users
 from .conftest import client, TestSessionLocal, test_user
 from routers.auth import bcrypt_context, create_access_token
+from .utils import access_token
 
 
 def test_create_user(test_user):
@@ -86,17 +87,12 @@ def test_read_user(test_user):
     """
 
     # Generate access token for test user
-    access_token = create_access_token(
-        user_id=1,
-        username="jane_doe",
-        user_role="ADMIN",
-        expire=timedelta(minutes=60)
-    )
+    _, token = access_token()
 
     # Send request with Authorization header
     response = client.get(
         "/users/me",
-        headers={"Authorization": f"Bearer {access_token}"}
+        headers={"Authorization": f"Bearer {token}"}
     )
 
     # Assertions
@@ -122,17 +118,12 @@ def test_read_user_not_found():
     }
 
     # Generate JWT token for this non-existent user
-    access_token = create_access_token(
-        user_id=payload["id"],
-        username=payload["username"],
-        user_role=payload["role"],
-        expire=timedelta(minutes=60)
-    )
+    _, token = access_token()
 
     # Make request with Authorization header
     response = client.get(
         "/users/me",
-        headers={"Authorization": f"Bearer {access_token}"}
+        headers={"Authorization": f"Bearer {token}"}
     )
 
     # Assert that the response returns a 404 NOT FOUND

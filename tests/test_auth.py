@@ -1,12 +1,15 @@
 import os
 from datetime import timedelta, datetime, timezone
 
+import pytest
+from fastapi import HTTPException
 from jose import jwt  # JWT encoding/decoding library
 from dotenv import load_dotenv
 from starlette import status
 
-from routers.auth import create_access_token, bcrypt_context
+from routers.auth import create_access_token, get_current_user
 from .conftest import test_user, client
+from .utils import access_token
 
 # Load environment variables
 load_dotenv()
@@ -32,27 +35,14 @@ def test_create_access_token():
         - Expiration timestamp should be in the future.
     """
 
-    # Sample user payload with expiration time
-    payload = {
-        "username": "johndoe",
-        "id": 1,
-        "role": "ADMIN",
-        "expire": timedelta(hours=1),  # Expiration time (1 hour)
-    }
-
     # Generate an access token
-    access_token = create_access_token(
-        user_id=payload["id"],
-        username=payload["username"],
-        user_role=payload["role"],
-        expire=payload["expire"]
-    )
+    payload, token = access_token()
 
     # Ensure the token is generated
-    assert access_token is not None
+    assert token is not None
 
     # Decode the generated token
-    decoded_access_token = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+    decoded_access_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
     # Validate decoded token data
     assert decoded_access_token["id"] == payload["id"]
@@ -62,6 +52,66 @@ def test_create_access_token():
     # Validate expiration timestamp
     exp_time = datetime.fromtimestamp(decoded_access_token["exp"], timezone.utc)
     assert exp_time > datetime.now(timezone.utc)  # Token should not be expired
+
+
+@pytest.mark.asyncio
+async def test_get_current_user(test_user):
+    """
+    Test retrieving the authenticated user's details.
+
+    Steps:
+    1. Generate a valid JWT token for the test user.
+    2. Call `get_current_user()` with the token.
+    3. Assert that the returned user data matches the expected payload.
+
+    Expected Outcome:
+    - The user is successfully authenticated.
+    - The function returns the correct user details.
+    """
+    payload, token = access_token()
+    user = await get_current_user(token)
+
+    assert user is not None  # Ensure user is returned
+    assert user["id"] == payload["id"]
+    assert user["username"] == payload["username"]
+    assert user["role"] == payload["role"]
+
+
+@pytest.mark.asyncio
+async def test_get_current_user_not_exist():
+    """
+    Test handling of an invalid JWT token where 'id' and 'username' are missing.
+
+    Steps:
+    1. Generate a token with missing user ID and username.
+    2. Call `get_current_user()` with the token.
+    3. Assert that an HTTP 401 Unauthorized exception is raised.
+
+    Expected Outcome:
+    - The function raises an HTTPException with status 401.
+    - The error message should be 'Could not validate credentials'.
+    """
+    payload = {
+        "username": None,  # Simulating a missing username
+        "id": None,  # Simulating a missing user ID
+        "role": "ADMIN",
+        "expire": timedelta(hours=1),  # Expiration time (1 hour)
+    }
+
+    # Generate an invalid access token
+    token = create_access_token(
+        user_id=payload["id"],  # type: ignore
+        username=payload["username"],  # type: ignore
+        user_role=payload["role"],
+        expire=payload["expire"]
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        await get_current_user(token)
+
+    # Assertions for HTTP 401 Unauthorized
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+    assert exc_info.value.detail == "Could not validate credentials"
 
 
 def test_user_login(test_user):

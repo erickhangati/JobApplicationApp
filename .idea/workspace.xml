@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Feature] Added user get profile route">
+    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Test] User profile read test">
+      <change afterPath="$PROJECT_DIR$/pytest.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb.db" beforeDir="false" afterPath="$PROJECT_DIR$/testdb.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_users.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -25,18 +28,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "erickhangati"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;erickhangati&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/erickhangati/JobApplicationApp.git",
-    "accountId": "ebb4873e-652c-41e7-846d-39636973314b"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/erickhangati/JobApplicationApp.git&quot;,
+    &quot;accountId&quot;: &quot;ebb4873e-652c-41e7-846d-39636973314b&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
@@ -86,7 +89,8 @@
       <workItem from="1741315448067" duration="544000" />
       <workItem from="1741316330294" duration="3001000" />
       <workItem from="1741327767978" duration="10533000" />
-      <workItem from="1741338444607" duration="29297000" />
+      <workItem from="1741338444607" duration="30144000" />
+      <workItem from="1741403303705" duration="9209000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -128,7 +132,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741374462263</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="[Test] User profile read test">
+      <option name="closed" value="true" />
+      <created>1741377037097</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1741377037097</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -143,6 +155,7 @@
     <MESSAGE value="[Feature] Added user login route with JWT authentication" />
     <MESSAGE value="[Test] Added authentication tests for user login" />
     <MESSAGE value="[Feature] Added user get profile route" />
-    <option name="LAST_COMMIT_MESSAGE" value="[Feature] Added user get profile route" />
+    <MESSAGE value="[Test] User profile read test" />
+    <option name="LAST_COMMIT_MESSAGE" value="[Test] User profile read test" />
   </component>
 </project>
