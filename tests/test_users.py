@@ -4,7 +4,7 @@ from starlette import status
 from models import Users
 from .conftest import client, TestSessionLocal, test_user
 from routers.auth import bcrypt_context, create_access_token
-from .utils import access_token
+from .utils import access_token, user_sample
 
 
 def test_create_user(test_user):
@@ -23,14 +23,7 @@ def test_create_user(test_user):
     """
 
     # New user payload
-    user = {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "johndoe@mail.com",
-        "username": "john_doe",
-        "password": bcrypt_context.hash("test1234"),
-        "role": "USER"
-    }
+    user = user_sample()
 
     # Send a POST request to create the user
     response = client.post('/users/register', json=user)
@@ -64,10 +57,10 @@ def test_create_user_exists(test_user):
     user = {
         "first_name": "Jane",
         "last_name": "Doe",
-        "email": "janedoe@mail.com",  # Already exists
+        "email": "janedoe@mail.com",
         "username": "jane_doe",
         "password": bcrypt_context.hash("test1234"),
-        "role": "ADMIN"
+        "role": "USER"
     }
 
     # Send a POST request to register the user
@@ -113,13 +106,6 @@ def test_read_user_not_found():
     It should return a 404 NOT FOUND error.
     """
 
-    # Simulate an authentication token for a non-existent user (ID = 9999)
-    payload = {
-        "id": 9999,
-        "username": "ghost_user",
-        "role": "USER"
-    }
-
     # Generate JWT token for this non-existent user
     _, token = access_token()
 
@@ -133,3 +119,70 @@ def test_read_user_not_found():
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json()["detail"] == "User not found"
 
+
+def test_update_user(test_user):
+    updated_user = {
+        "first_name": "Edited Jane",
+        "last_name": "Doe",
+        "email": "janedoe@mail.com",  # Already exists
+        "username": "jane_doe",
+        "password": bcrypt_context.hash("test1234"),
+        "role": "ADMIN"
+    }
+
+    _, token = access_token()
+
+    response = client.put(
+        "/users/me",
+        headers={"Authorization": f"Bearer {token}"},
+        json=updated_user
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    db = TestSessionLocal()
+    user = db.query(Users).filter(Users.id == 1).first()
+    assert user.first_name == updated_user.get("first_name")
+    assert user.last_name == updated_user.get("last_name")
+    assert user.email == updated_user.get("email")
+    assert user.username == updated_user.get("username")
+    assert user.role == updated_user.get("role")
+
+
+def test_update_user_not_exist():
+    """
+    Tests updating a non-existent user.
+
+    - Creates an update request with user details that do not exist in the database.
+    - Sends the update request with a valid JWT token.
+    - Asserts that the response status is 404 NOT FOUND.
+    - Ensures the correct error message is returned.
+
+    Expected Behavior:
+    - The request should fail with a 404 status code.
+    - The response should contain the message "User not found".
+    """
+
+    # Define update payload for a non-existent user
+    updated_user = {
+        "first_name": "Non_Existent",
+        "last_name": "User",
+        "email": "nonexistentuser@mail.com",
+        "username": "non_existent_user",
+        "password": bcrypt_context.hash("test1234"),  # Hash the password
+        "role": "ADMIN"
+    }
+
+    # Generate an access token (but the user does not exist in the database)
+    _, token = access_token()
+
+    # Send PUT request to update user profile
+    response = client.put(
+        "/users/me",
+        headers={"Authorization": f"Bearer {token}"},  # Include JWT token
+        json=updated_user  # Send updated user details as JSON
+    )
+
+    # Assertions
+    assert response.status_code == status.HTTP_404_NOT_FOUND  # Expect 404 Not Found
+    assert response.json()["detail"] == "User not found"  # Ensure correct error message

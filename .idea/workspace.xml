@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Feature] Added user update route">
+    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Fix] Improved response on read user route">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/users.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb.db" beforeDir="false" afterPath="$PROJECT_DIR$/testdb.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_users.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/utils.py" afterDir="false" />
@@ -90,7 +88,7 @@
       <workItem from="1741316330294" duration="3001000" />
       <workItem from="1741327767978" duration="10533000" />
       <workItem from="1741338444607" duration="30144000" />
-      <workItem from="1741403303705" duration="14686000" />
+      <workItem from="1741403303705" duration="18478000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -164,7 +162,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741418444527</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="[Fix] Improved response on read user route">
+      <option name="closed" value="true" />
+      <created>1741419672546</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1741419672546</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -183,6 +189,7 @@
     <MESSAGE value="[Test] Added get_current_user function test" />
     <MESSAGE value="Refactor] Standardized /me route response format using create_response" />
     <MESSAGE value="[Feature] Added user update route" />
-    <option name="LAST_COMMIT_MESSAGE" value="[Feature] Added user update route" />
+    <MESSAGE value="[Fix] Improved response on read user route" />
+    <option name="LAST_COMMIT_MESSAGE" value="[Fix] Improved response on read user route" />
   </component>
 </project>
