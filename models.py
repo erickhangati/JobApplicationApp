@@ -4,7 +4,7 @@ models.py - Defines SQLAlchemy models and Pydantic schemas for a job application
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field
@@ -133,6 +133,7 @@ class JobRequest(BaseModel):
     currency: str = Field(min_length=3, description='Currency')
 
     model_config = {
+        "from_attributes": True,
         "json_schema_extra": {
             "example": {
                 'title': 'Software Engineer',
@@ -155,6 +156,34 @@ class JobRequest(BaseModel):
                 'currency': 'USD',
             }
         }
+    }
+
+
+class JobResponse(BaseModel):
+    """Schema for job response."""
+
+    id: int
+    title: str
+    description: str
+    company: Optional[str]
+    location: str
+    min_salary: Optional[int]
+    max_salary: Optional[int]
+    med_salary: Optional[int]
+    pay_period: Optional[str]
+    views: int
+    listed_time: datetime
+    expiry: Optional[datetime]
+    remote_allowed: Optional[bool]
+    application_type: Optional[str]
+    experience_level: Optional[str]
+    skills_desc: str
+    sponsored: Optional[bool]
+    work_type: Optional[str]
+    currency: Optional[str]
+
+    model_config = {
+        "from_attributes": True
     }
 
 
@@ -206,7 +235,7 @@ class ChangePasswordRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example":{
+            "example": {
                 "old_password": "test1234",
                 "new_password": "test4321",
                 "confirm_password": "test4321"
