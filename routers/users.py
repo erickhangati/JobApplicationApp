@@ -6,7 +6,8 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from .auth import bcrypt_context, user_dependency  # Import password hashing context
-from models import UserRequest, Users, UserRequestBase  # Import models
+from models import UserRequest, Users, UserRequestBase, \
+    ChangePasswordRequest  # Import models
 from database import db_dependency  # Import database dependency
 from utils import create_response  # Import response utility function
 
@@ -167,3 +168,56 @@ async def update_user(
     # Commit changes to the database
     db.commit()
     db.refresh(user)
+
+
+@router.put("/me/change-password", status_code=status.HTTP_204_NO_CONTENT)
+async def change_password(
+        db: db_dependency,
+        request: user_dependency,
+        password_update: ChangePasswordRequest):
+    """
+    Updates the authenticated user's password.
+
+    Args:
+        db (Session): Database session dependency.
+        request (dict): Dictionary containing authenticated user details from JWT token.
+        password_update (ChangePasswordRequest): Pydantic model containing old and new password details.
+
+    Returns:
+        HTTP 204 No Content: If the password change is successful.
+
+    Raises:
+        HTTPException 404: If the user is not found.
+        HTTPException 400: If the old password is incorrect or new passwords do not match.
+    """
+
+    # Retrieve the user from the database using the ID from the JWT token
+    user = db.query(Users).filter(Users.id == request.get("id")).first()
+
+    # Raise an error if the user is not found
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Verify if the provided old password is correct
+    if not bcrypt_context.verify(password_update.old_password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong old password"
+        )
+
+    # Ensure the new passwords match
+    if password_update.new_password != password_update.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Passwords do not match"
+        )
+
+    # Hash the new password and update the user's record
+    user.hashed_password = bcrypt_context.hash(password_update.new_password)
+
+    # Commit the changes to the database
+    db.commit()
+    db.refresh(user)  # Refresh user object after update

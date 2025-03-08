@@ -199,6 +199,22 @@ class UserRequest(UserRequestBase):
     }
 
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str = Field(min_length=3, description='Old password')
+    new_password: str = Field(min_length=3, description='New password')
+    confirm_password: str = Field(min_length=3, description='Confirm new password')
+
+    model_config = {
+        "json_schema_extra": {
+            "example":{
+                "old_password": "test1234",
+                "new_password": "test4321",
+                "confirm_password": "test4321"
+            }
+        }
+    }
+
+
 class AppliedJobsRequest(BaseModel):
     """Schema for applying to a job."""
 
