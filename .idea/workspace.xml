@@ -4,18 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Feature] Added read jobs route">
-      <change afterPath="$PROJECT_DIR$/routers/profile.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_profile.py" afterDir="false" />
+    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Enhancement] Improved job listing with filtered search and pagination">
+      <change afterPath="$PROJECT_DIR$/tests/test_jobs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routers/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/jobs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/users.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb.db" beforeDir="false" afterPath="$PROJECT_DIR$/testdb.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_users.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_users.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +91,8 @@
       <workItem from="1741327767978" duration="10533000" />
       <workItem from="1741338444607" duration="30144000" />
       <workItem from="1741403303705" duration="38346000" />
-      <workItem from="1741488139713" duration="3824000" />
+      <workItem from="1741488139713" duration="11182000" />
+      <workItem from="1741521589287" duration="4539000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -210,7 +206,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741447045189</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="[Enhancement] Improved job listing with filtered search and pagination">
+      <option name="closed" value="true" />
+      <created>1741492342650</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1741492342650</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -234,6 +238,7 @@
     <MESSAGE value="[Feature] Implemented user password change route" />
     <MESSAGE value="[Test] Added user password change tests" />
     <MESSAGE value="[Feature] Added read jobs route" />
-    <option name="LAST_COMMIT_MESSAGE" value="[Feature] Added read jobs route" />
+    <MESSAGE value="[Enhancement] Improved job listing with filtered search and pagination" />
+    <option name="LAST_COMMIT_MESSAGE" value="[Enhancement] Improved job listing with filtered search and pagination" />
   </component>
 </project>

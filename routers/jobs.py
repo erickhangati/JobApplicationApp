@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Path, HTTPException
 from starlette import status
 
 from database import db_dependency
@@ -90,5 +90,41 @@ async def read_jobs(
     return create_response(
         message="Jobs retrieved successfully",
         data=response_data,
+        status_code=status.HTTP_200_OK
+    )
+
+
+@router.get("/jobs/{job_id}", response_model=JobResponse, status_code=status.HTTP_200_OK)
+async def read_job(
+        db: db_dependency,
+        job_id: int = Path(gt=0, description="Job ID (must be greater than 0)")):
+    """
+    Retrieves a specific job by its ID.
+
+    Args:
+        db (Session): Database session dependency.
+        job_id (int): ID of the job to retrieve.
+
+    Returns:
+        JobResponse: Job details.
+
+    Raises:
+        HTTPException: If the job does not exist.
+    """
+
+    # Fetch the job from the database
+    job = db.query(Jobs).filter(Jobs.id == job_id).first()
+
+    # Handle job not found
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+
+    # Convert SQLAlchemy object to Pydantic response model
+    job_data = JobResponse.model_validate(job)
+
+    # Return standardized JSON response
+    return create_response(
+        message="Job retrieved successfully",
+        data=job_data.model_dump(mode="json"),  # Ensure JSON serialization
         status_code=status.HTTP_200_OK
     )

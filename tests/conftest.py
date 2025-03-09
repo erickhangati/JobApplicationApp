@@ -6,10 +6,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
+from datetime import datetime, timezone
 
 from database import Base, get_db
 from main import app
-from models import Users
+from models import Users, Jobs
 from routers.auth import bcrypt_context, get_current_user
 
 load_dotenv()
@@ -54,11 +55,50 @@ def test_user():
     db = TestSessionLocal()
     db.add(user)
     db.commit()
-    yield db
 
-    with engine.connect() as connection:
-        connection.execute(text('DELETE FROM users'))
-        connection.commit()
+    try:
+        yield user
+    finally:
+        with engine.connect() as connection:
+            connection.execute(text('DELETE FROM users'))
+            connection.commit()
+            db.close()
+
+
+@pytest.fixture
+def test_job():
+    job = Jobs(
+        title="Test Job",
+        description="Test job description",
+        company="Test Company",
+        location="Test Location",
+        min_salary=10000,
+        max_salary=50000,
+        med_salary=25000,
+        pay_period="Hourly",
+        views=100,
+        listed_time=datetime.now(timezone.utc),
+        expiry=datetime.now(timezone.utc),
+        remote_allowed=True,
+        application_type="ComplexOnsiteApply",
+        experience_level="Mid-Senior level",
+        skills_desc="No Skills Description",
+        sponsored=False,
+        work_type="Full-time",
+        currency="USD"
+    )
+
+    db = TestSessionLocal()
+    db.add(job)
+    db.commit()
+
+    try:
+        yield job
+    finally:
+        with engine.connect() as connection:
+            connection.execute(text('DELETE FROM jobs'))
+            connection.commit()
+            db.close()
 
 
 app.dependency_overrides[get_db] = override_get_db
