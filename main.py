@@ -8,7 +8,7 @@ for handling authentication, admin operations, job postings, and user management
 from fastapi import FastAPI
 
 # Importing routers for different modules
-from routers import auth, admin, jobs, users
+from routers import auth, admin, jobs, users, profile
 
 # Initialize FastAPI application
 app = FastAPI(
@@ -18,7 +18,8 @@ app = FastAPI(
 )
 
 # Include routers for modularized functionality
-app.include_router(auth.router)   # Authentication routes
+app.include_router(auth.router)  # Authentication routes
 app.include_router(admin.router)  # Admin-related routes
-app.include_router(jobs.router)   # Job management routes
+app.include_router(jobs.router)  # Job management routes
 app.include_router(users.router)  # User management routes
+app.include_router(profile.router)  # Profile management routes

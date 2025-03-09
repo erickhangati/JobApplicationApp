@@ -10,7 +10,6 @@ from starlette import status
 
 from database import db_dependency
 from models import Token, Users
-from utils import create_response
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ALGORITHM = 'HS256'
@@ -19,7 +18,7 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 token_dependency = Annotated[OAuth2PasswordRequestForm, Depends()]
 bearer_dependency = Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="/auth/login"))]
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 
 def create_access_token(user_id: int, username: str, user_role: str,
@@ -76,7 +75,7 @@ async def get_current_user(token: bearer_dependency):
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-@router.post("/login", response_model=Token, status_code=status.HTTP_201_CREATED)
+@router.post("/auth/login", response_model=Token, status_code=status.HTTP_201_CREATED)
 async def create_token(db: db_dependency, user_request: token_dependency):
     """
     Authenticates a user and generates an access token.

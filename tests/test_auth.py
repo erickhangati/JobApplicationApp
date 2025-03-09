@@ -3,7 +3,7 @@ from datetime import timedelta, datetime, timezone
 
 import pytest
 from fastapi import HTTPException
-from jose import jwt  # JWT encoding/decoding library
+from jose import jwt
 from dotenv import load_dotenv
 from starlette import status
 
