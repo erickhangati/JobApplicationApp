@@ -139,3 +139,58 @@ def test_filter_jobs_by_max_salary_invalid_value(invalid_value):
     response = client.get(f"/jobs?max_salary={invalid_value}")
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+# def test_read_job(test_job):
+#     response = client.get("/jobs/1")
+#     assert response.status_code == status.HTTP_200_OK
+#     assert response.json()["message"] == "Job retrieved successfully"
+#     assert response.json()["data"]["title"] == "Test Job"
+
+
+def test_read_job(test_job):
+    """
+    Tests retrieving a single job by ID.
+
+    - Sends a GET request for a job with the test_job's ID.
+    - Asserts that the response status is 200 OK.
+    - Verifies that the job details match the expected values.
+    """
+
+    # Use the actual test job ID to avoid hardcoding
+    response = client.get(f"/jobs/{test_job.id}")
+
+    # Ensure the request was successful
+    assert response.status_code == status.HTTP_200_OK, f"Expected 200, got {response.status_code}"
+
+    # Extract response JSON
+    response_data = response.json()
+
+    # Assertions on the response structure
+    assert response_data["message"] == "Job retrieved successfully", "Message mismatch"
+
+    job_data = response_data["data"]
+    assert job_data["id"] == test_job.id, "Job ID mismatch"
+    assert job_data["title"] == test_job.title, "Title mismatch"
+    assert job_data["company"] == test_job.company, "Company mismatch"
+    assert job_data["location"] == test_job.location, "Location mismatch"
+    assert job_data["min_salary"] == test_job.min_salary, "Min Salary mismatch"
+    assert job_data["max_salary"] == test_job.max_salary, "Max Salary mismatch"
+    assert (job_data["remote_allowed"]
+            == test_job.remote_allowed), "Remote Allowed mismatch"
+
+
+def test_read_job_not_exist():
+    """
+    Tests retrieving a single job by non_existent ID.
+
+    - Sends a GET request for a job with a non_existent ID.
+    - Asserts that the response status is 404 OK.
+    """
+
+    # Use the actual test job ID to avoid hardcoding
+    response = client.get(f"/jobs/999")
+
+    # Ensure the request was successful
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected 404, got {response.status_code}"
