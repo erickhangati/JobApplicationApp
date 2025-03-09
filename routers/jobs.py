@@ -1,10 +1,12 @@
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Query, Path, HTTPException
 from starlette import status
 
 from database import db_dependency
-from models import Jobs, JobResponse
+from models import Jobs, JobResponse, Users, AppliedJobResponse, AppliedJobs
+from routers.auth import user_dependency
 from utils import create_response
 
 router = APIRouter(tags=["jobs"])
@@ -127,4 +129,82 @@ async def read_job(
         message="Job retrieved successfully",
         data=job_data.model_dump(mode="json"),  # Ensure JSON serialization
         status_code=status.HTTP_200_OK
+    )
+
+
+@router.post("/jobs/{job_id}/apply",
+             response_model=AppliedJobResponse,
+             status_code=status.HTTP_201_CREATED)
+async def create_job_application(
+        db: db_dependency,
+        user_request: user_dependency,
+        job_id: int = Path(gt=0, description="Job ID (must be greater than 0)")):
+    """
+    Allows a user to apply for a job.
+
+    Args:
+        db (Session): Database session dependency.
+        user_request (dict): The authenticated user making the request.
+        job_id (int): The ID of the job being applied to.
+
+    Returns:
+        JSONResponse: A standardized response containing the application details.
+
+    Raises:
+        HTTPException: If the job or user does not exist, or if the user has already applied.
+    """
+
+    # Fetch the job by ID
+    job = db.query(Jobs).filter(Jobs.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+
+    # Validate user ID
+    user_id = user_request.get("id")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid user credentials"
+        )
+
+    # Fetch the user from the database
+    user = db.query(Users).filter(Users.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="User not found")
+
+    # Check if the user has already applied for the job
+    existing_application = db.query(AppliedJobs).filter(
+        AppliedJobs.user_id == user.id,
+        AppliedJobs.job_id == job.id
+    ).first()
+
+    if existing_application:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already applied for this job"
+        )
+
+    # Create a new job application
+    applied_job = AppliedJobs(
+        user_id=user.id,
+        job_id=job.id,
+        applied_at=datetime.now(timezone.utc),
+        application_status="Pending"
+    )
+
+    # Add and commit changes to the database
+    db.add(applied_job)
+    db.commit()
+    db.refresh(applied_job)
+
+    # Convert SQLAlchemy object to Pydantic response model
+    applied_job_data = AppliedJobResponse.model_validate(applied_job,
+                                                         from_attributes=True)
+
+    # Return structured response
+    return create_response(
+        message="Job applied successfully",
+        data=applied_job_data.model_dump(mode="json"),
+        status_code=status.HTTP_201_CREATED
     )

@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Test] Added tests for read jobs filters">
+    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Test] Added tests for read job by id">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testdb.db" beforeDir="false" afterPath="$PROJECT_DIR$/testdb.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_jobs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routers/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/jobs.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,7 +89,7 @@
       <workItem from="1741338444607" duration="30144000" />
       <workItem from="1741403303705" duration="38346000" />
       <workItem from="1741488139713" duration="11182000" />
-      <workItem from="1741521589287" duration="6338000" />
+      <workItem from="1741521589287" duration="18058000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -219,7 +219,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741526890375</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="[Test] Added tests for read job by id">
+      <option name="closed" value="true" />
+      <created>1741529721558</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1741529721558</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -245,6 +253,7 @@
     <MESSAGE value="[Feature] Added read jobs route" />
     <MESSAGE value="[Enhancement] Improved job listing with filtered search and pagination" />
     <MESSAGE value="[Test] Added tests for read jobs filters" />
-    <option name="LAST_COMMIT_MESSAGE" value="[Test] Added tests for read jobs filters" />
+    <MESSAGE value="[Test] Added tests for read job by id" />
+    <option name="LAST_COMMIT_MESSAGE" value="[Test] Added tests for read job by id" />
   </component>
 </project>

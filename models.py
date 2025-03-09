@@ -244,20 +244,14 @@ class ChangePasswordRequest(BaseModel):
     }
 
 
-class AppliedJobsRequest(BaseModel):
+class AppliedJobResponse(BaseModel):
     """Schema for applying to a job."""
 
-    user_id: int = Field(gt=0, description="ID of the user applying")
-    job_id: int = Field(gt=0, description="ID of the job being applied for")
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "user_id": 1,
-                "job_id": 10
-            }
-        }
-    }
+    id: int
+    user_id: int
+    job_id: int
+    applied_at: datetime
+    application_status: str
 
 
 class Token(BaseModel):
