@@ -1,9 +1,10 @@
 import pytest
 from starlette import status
 
-from models import Jobs
-from .conftest import test_job, TestSessionLocal, client
-from .utils import job_sample
+from routers.auth import user_dependency
+from .conftest import test_job, test_user, test_applied_job, client
+from .utils import override_invalid_user
+from main import app
 
 
 def test_read_jobs_response_format():
@@ -194,3 +195,81 @@ def test_read_job_not_exist():
     # Ensure the request was successful
     assert response.status_code == status.HTTP_404_NOT_FOUND, \
         f"Expected 404, got {response.status_code}"
+
+
+def test_apply_job(test_applied_job, test_job, test_user):
+    """
+    Test case for applying to a job posting.
+
+    This test sends a POST request to apply for a job and verifies that:
+    1. The response status code is 201 (Created).
+    2. The response message confirms successful job application.
+    3. The returned user_id matches the expected test user.
+    4. The returned job_id matches the expected test job.
+
+    Args:
+        test_applied_job: Fixture providing the applied job instance.
+        test_job: Fixture providing the job instance to apply for.
+        test_user: Fixture providing the user instance applying for the job.
+    """
+    # Send POST request to apply for the job
+    response = client.post(f"/jobs/{test_job.id}/apply")
+
+    # Extract JSON response data
+    response_data = response.json()
+
+    # Assert the response status code
+    assert response.status_code == status.HTTP_201_CREATED, f"Expected 201, got {response.status_code}"
+
+    # Validate response message
+    assert response_data['message'] == "Job applied successfully", "Message mismatch"
+
+    # Verify that the correct user and job IDs are returned
+    assert response_data['data']["user_id"] == test_user.id, "User ID mismatch"
+    assert response_data['data']["job_id"] == test_job.id, "Job ID mismatch"
+
+
+def test_apply_job_nonexistent_job(test_applied_job, test_user):
+    """
+    Test applying for a nonexistent job.
+
+    This test ensures that attempting to apply for a job that does not exist
+    results in a 404 Not Found response.
+
+    Args:
+        test_applied_job: Fixture for an applied job (if needed for setup).
+        test_user: Fixture representing the user applying for the job.
+
+    Assertions:
+        - The response status code should be 404 (Not Found).
+    """
+
+    # Attempt to apply for a nonexistent job (assuming job ID 1 does not exist)
+    response = client.post("/jobs/1/apply")
+
+    # Verify the response status code
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected status 404, but got {response.status_code}"
+
+
+def test_apply_job_nonexistent_user(test_applied_job, test_job):
+    """
+    Test applying for a nonexistent user.
+
+    This test ensures that attempting to apply for a job with non-existent user
+    results in a 404 Not Found response.
+
+    Args:
+        test_applied_job: Fixture for an applied job (if needed for setup).
+        test_job: Fixture representing the job being applied.
+
+    Assertions:
+        - The response status code should be 404 (Not Found).
+    """
+
+    # Attempt to apply for a nonexistent job (assuming job ID 1 does not exist)
+    response = client.post(f"/jobs/{test_job.id}/apply")
+
+    # Verify the response status code
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected status 404, but got {response.status_code}"

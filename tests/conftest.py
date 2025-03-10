@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from database import Base, get_db
 from main import app
-from models import Users, Jobs
+from models import Users, Jobs, AppliedJobs
 from routers.auth import bcrypt_context, get_current_user
 
 load_dotenv()
@@ -97,6 +97,28 @@ def test_job():
     finally:
         with engine.connect() as connection:
             connection.execute(text('DELETE FROM jobs'))
+            connection.commit()
+            db.close()
+
+
+@pytest.fixture
+def test_applied_job():
+    applied_job = AppliedJobs(
+        user_id=2,
+        job_id=1,
+        applied_at=datetime.now(timezone.utc),
+        application_status="Pending"
+    )
+
+    db = TestSessionLocal()
+    db.add(applied_job)
+    db.commit()
+
+    try:
+        yield applied_job
+    finally:
+        with engine.connect() as connection:
+            connection.execute(text('DELETE FROM applied_jobs'))
             connection.commit()
             db.close()
 
