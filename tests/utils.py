@@ -1,9 +1,6 @@
 from datetime import timedelta, datetime, timezone
 
-import pytest
-
-from main import app
-from routers.auth import create_access_token, bcrypt_context, user_dependency
+from routers.auth import create_access_token, bcrypt_context
 
 
 def user_sample():
@@ -18,6 +15,7 @@ def user_sample():
 
 
 def job_sample():
+    now = datetime.now(timezone.utc)
     return {
         "title": "Test Job",
         "description": "Test job description",
@@ -28,8 +26,8 @@ def job_sample():
         "med_salary": 25000,
         "pay_period": "Hourly",
         "views": 100,
-        "listed_time": datetime.now(timezone.utc),
-        "expiry": datetime.now(timezone.utc),
+        "listed_time": now.isoformat(),
+        "expiry": (now + timedelta(days=30)).isoformat(),
         "remote_allowed": True,
         "application_type": "ComplexOnsiteApply",
         "experience_level": "Mid-Senior level",
@@ -57,5 +55,3 @@ def access_token():
     )
 
     return payload, token
-
-

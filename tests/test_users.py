@@ -36,6 +36,7 @@ def test_create_user(test_user):
     created_user = db.query(Users).filter_by(username="john_doe").first()
     assert created_user is not None
     assert created_user.first_name == "John"
+    db.close()
 
 
 def test_create_user_exists(test_user):

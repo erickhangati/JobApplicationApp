@@ -41,15 +41,52 @@ def override_get_current_user():
     }
 
 
+# @pytest.fixture
+# def test_user():
+#     user = Users(
+#         first_name="Jane",
+#         last_name="Doe",
+#         email="janedoe@mail.com",
+#         username="jane_doe",
+#         hashed_password=bcrypt_context.hash("test1234"),
+#         role="ADMIN"
+#     )
+#
+#     db = TestSessionLocal()
+#     db.add(user)
+#     db.commit()
+#
+#     try:
+#         yield user
+#     finally:
+#         with engine.connect() as connection:
+#             connection.execute(text('DELETE FROM users'))
+#             connection.commit()
+#             db.close()
+
 @pytest.fixture
-def test_user():
+def test_user(request):
+    """
+    Fixture to create a test user dynamically with a specified role.
+
+    Args:
+        request: A pytest request object to allow parameterization.
+
+    Returns:
+        Users: A user object for testing.
+    """
+
+    # Default to "USER" if no role is specified in the test function
+    role = getattr(request, "param", "ADMIN")
+
+    # Create a test user
     user = Users(
         first_name="Jane",
         last_name="Doe",
         email="janedoe@mail.com",
         username="jane_doe",
         hashed_password=bcrypt_context.hash("test1234"),
-        role="ADMIN"
+        role=role
     )
 
     db = TestSessionLocal()
@@ -57,10 +94,10 @@ def test_user():
     db.commit()
 
     try:
-        yield user
+        yield user  # Provide user object for the test
     finally:
         with engine.connect() as connection:
-            connection.execute(text('DELETE FROM users'))
+            connection.execute(text('DELETE FROM users'))  # Cleanup after test
             connection.commit()
             db.close()
 

@@ -83,6 +83,7 @@ def test_update_user(test_user):
     assert user.email == updated_user.get("email")
     assert user.username == updated_user.get("username")
     assert user.role == updated_user.get("role")
+    db.close()
 
 
 def test_update_user_not_exist():
@@ -163,6 +164,7 @@ def test_user_change_password(test_user):
 
     # Ensure the new password is correctly hashed and stored
     assert bcrypt_context.verify(payload["new_password"], user.hashed_password)
+    db.close()
 
 
 def test_user_change_password_not_exist():

@@ -1,9 +1,10 @@
 import pytest
 from starlette import status
 
+from models import Jobs
 from .conftest import (test_job, test_user, test_applied_job, test_user_applied_job,
-                       client)
-from .utils import access_token
+                       client, TestSessionLocal)
+from .utils import access_token, job_sample
 
 
 def test_read_jobs_response_format():
@@ -139,13 +140,6 @@ def test_filter_jobs_by_max_salary_invalid_value(invalid_value):
     response = client.get(f"/jobs?max_salary={invalid_value}")
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-
-# def test_read_job(test_job):
-#     response = client.get("/jobs/1")
-#     assert response.status_code == status.HTTP_200_OK
-#     assert response.json()["message"] == "Job retrieved successfully"
-#     assert response.json()["data"]["title"] == "Test Job"
 
 
 def test_read_job(test_job):
@@ -294,8 +288,128 @@ def test_read_user_applied_jobs(test_user_applied_job, test_user):
 
 
 def test_read_applied_jobs_user_dont_exist(test_user_applied_job):
+    """
+    Test retrieving applied jobs for a non-existent user.
+
+    This test ensures that if an authenticated user who does not exist in the database
+    tries to retrieve their applied jobs, the API responds with a 404 Not Found error.
+
+    Args:
+        test_user_applied_job: Fixture for setting up an applied job scenario.
+
+    Assertions:
+        - The response status code should be 404 (Not Found).
+        - The error message should indicate that the user was not found.
+    """
+
+    # Generate an access token for authentication
     _, token = access_token()
 
-    response = client.get("/jobs/applied", headers={"Authorization": f"Bearer {token}"})
-    assert response.status_code == status.HTTP_404_NOT_FOUND, f"Expected 404 OK, but got {response.status_code}"
+    # Attempt to retrieve applied jobs for a nonexistent user
+    response = client.get(
+        "/jobs/applied",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Verify the response status code and error message
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected 404, but got {response.status_code}"
     assert response.json()["detail"] == "User not found", "Detail mismatch"
+
+
+def test_create_job(test_job, test_user):
+    """
+    Test creating a new job listing.
+
+    This test verifies that an authenticated user can successfully create a job
+    and that the job is stored correctly in the database.
+
+    Args:
+        test_job: Fixture providing a sample job.
+        test_user: Fixture providing a sample user.
+
+    Assertions:
+        - The response status code should be 201 (Created).
+        - The response should contain a success message.
+        - The created job should exist in the database with the correct title.
+    """
+
+    # Generate an access token for authentication
+    _, token = access_token()
+
+    # Prepare a sample job payload
+    job = job_sample()
+
+    # Send a POST request to create a new job
+    response = client.post(
+        "/jobs",
+        headers={"Authorization": f"Bearer {token}"},
+        json=job
+    )
+
+    # Verify the response status code and message
+    assert response.status_code == status.HTTP_201_CREATED, \
+        f"Expected 201, but got {response.status_code}"
+    assert response.json()["message"] == "Job created successfully", "Message mismatch"
+    assert "data" in response.json(), "Response does not contain job data"
+
+    # Query the database to confirm job creation
+    db = TestSessionLocal()
+    created_job_id = response.json().get("data", {}).get("id")  # Dynamically get job ID
+    created_job = db.query(Jobs).filter(Jobs.id == created_job_id).first()
+
+    # Ensure the job was successfully created
+    assert created_job is not None, "Job was not found in the database"
+    assert created_job.title == job.get(
+        "title"), "Job title does not match the request data"
+
+    # Close the database session
+    db.close()
+
+
+def test_create_job_user_dont_exist(test_job):
+    """
+    Test creating a job when the user does not exist.
+
+    This test ensures that attempting to create a job with an authenticated user
+    who does not exist in the database results in a 404 Not Found error.
+
+    Args:
+        test_job: Fixture for a sample job (if needed for setup).
+
+    Assertions:
+        - The response status code should be 404 (Not Found).
+        - The error message should indicate that the user was not found.
+    """
+
+    # Generate an access token for authentication
+    _, token = access_token()
+
+    # Create a sample job payload
+    job = job_sample()
+
+    # Attempt to create a job with a nonexistent user
+    response = client.post(
+        "/jobs",
+        headers={"Authorization": f"Bearer {token}"},
+        json=job
+    )
+
+    # Verify the response status code and error message
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected 404, but got {response.status_code}"
+    assert response.json()["detail"] == "User not found", "Detail mismatch"
+
+
+@pytest.mark.parametrize("test_user", ["USER"], indirect=True)
+def test_create_job_user_not_admin(test_job, test_user):
+    _, token = access_token()
+    job = job_sample()
+    response = client.post(
+        "/jobs",
+        headers={"Authorization": f"Bearer {token}"},
+        json=job
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN, f"Expected 403 OK, but got {response.status_code}"
+    assert response.json()[
+               "detail"] == "You do not have permission to perform this action", f"Detail mismatch"
