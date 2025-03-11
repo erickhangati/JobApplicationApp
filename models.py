@@ -2,7 +2,7 @@
 models.py - Defines SQLAlchemy models and Pydantic schemas for a job application system.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from typing import Optional, List
 
@@ -120,7 +120,7 @@ class JobRequest(BaseModel):
     max_salary: int = Field(gt=0, description='Maximum salary')
     med_salary: int = Field(gt=0, description='Median salary')
     pay_period: str = Field(min_length=3, description='Payment period')
-    views: int = Field(gt=0, description='Views')
+    views: int = Field(description='Views')
     listed_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc),
                                   description='Listed date')
     expiry: datetime = Field(description='Expiry date')
@@ -146,7 +146,7 @@ class JobRequest(BaseModel):
                 'pay_period': 'Monthly',
                 'views': 0,
                 'listed_time': datetime.now(timezone.utc),
-                'expiry': datetime.now(timezone.utc),
+                'expiry': datetime.now(timezone.utc) + timedelta(days=30),
                 'remote_allowed': True,
                 'application_type': 'Online',
                 'experience_level': 'Mid-Level',

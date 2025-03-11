@@ -5,7 +5,7 @@ from fastapi import APIRouter, Query, Path, HTTPException
 from starlette import status
 
 from database import db_dependency
-from models import Jobs, JobResponse, Users, AppliedJobResponse, AppliedJobs
+from models import Jobs, JobResponse, Users, AppliedJobResponse, AppliedJobs, JobRequest
 from routers.auth import user_dependency
 from utils import create_response
 
@@ -245,5 +245,65 @@ async def create_job_application(
     return create_response(
         message="Job applied successfully",
         data=applied_job_data.model_dump(mode="json"),
+        status_code=status.HTTP_201_CREATED
+    )
+
+
+@router.post("/jobs", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
+async def create_job(
+        db: db_dependency,
+        user_request: user_dependency,
+        job_request: JobRequest
+):
+    """
+    Creates a new job posting.
+
+    Args:
+        db (Session): Database session dependency.
+        user_request (dict): Dictionary containing authenticated user details from JWT token.
+        job_request (JobRequest): Pydantic model containing job details.
+
+    Returns:
+        JSONResponse: Standardized response with job details and success message.
+
+    Raises:
+        HTTPException:
+            - 404 NOT FOUND: If the authenticated user is not found.
+            - 403 FORBIDDEN: If the user does not have admin privileges.
+    """
+
+    # Retrieve the user from the database
+    user = db.query(Users).filter(Users.id == user_request.get("id")).first()
+
+    # Check if the user exists
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Check if the user has admin privileges
+    if user.role != 'ADMIN':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action"
+        )
+
+    # Create a new job instance using the validated request data
+    job = Jobs(**job_request.model_dump())
+
+    # Add and commit the job to the database
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+
+    # Convert the SQLAlchemy object to a Pydantic model for response
+    job_data = JobResponse.model_validate(job)
+
+    # Return standardized JSON response
+    return create_response(
+        message="Job created successfully",
+        data=job_data.model_dump(mode="json"),
+        location=f"/jobs/{job.id}",
         status_code=status.HTTP_201_CREATED
     )
