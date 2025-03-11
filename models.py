@@ -253,6 +253,10 @@ class AppliedJobResponse(BaseModel):
     applied_at: datetime
     application_status: str
 
+    model_config = {
+        "from_attributes": True
+    }
+
 
 class Token(BaseModel):
     """Schema for a token."""

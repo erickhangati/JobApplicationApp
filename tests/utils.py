@@ -59,11 +59,3 @@ def access_token():
     return payload, token
 
 
-@pytest.fixture
-def override_invalid_user():
-    """Fixture to override user_dependency with an invalid user."""
-    app.dependency_overrides[user_dependency] = lambda: {}  # Return empty user
-
-    yield  # This ensures the override is only active for the test
-
-    app.dependency_overrides.pop(user_dependency, None)  # Restore original dependency

@@ -123,6 +123,28 @@ def test_applied_job():
             db.close()
 
 
+@pytest.fixture
+def test_user_applied_job():
+    applied_job = AppliedJobs(
+        user_id=1,
+        job_id=1,
+        applied_at=datetime.now(timezone.utc),
+        application_status="Pending"
+    )
+
+    db = TestSessionLocal()
+    db.add(applied_job)
+    db.commit()
+
+    try:
+        yield applied_job
+    finally:
+        with engine.connect() as connection:
+            connection.execute(text('DELETE FROM applied_jobs'))
+            connection.commit()
+            db.close()
+
+
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_current_user] = override_get_current_user
 

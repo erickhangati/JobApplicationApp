@@ -1,10 +1,9 @@
 import pytest
 from starlette import status
 
-from routers.auth import user_dependency
-from .conftest import test_job, test_user, test_applied_job, client
-from .utils import override_invalid_user
-from main import app
+from .conftest import (test_job, test_user, test_applied_job, test_user_applied_job,
+                       client)
+from .utils import access_token
 
 
 def test_read_jobs_response_format():
@@ -181,7 +180,7 @@ def test_read_job(test_job):
             == test_job.remote_allowed), "Remote Allowed mismatch"
 
 
-def test_read_job_not_exist():
+def test_read_job_dont_exist():
     """
     Tests retrieving a single job by non_existent ID.
 
@@ -273,3 +272,30 @@ def test_apply_job_nonexistent_user(test_applied_job, test_job):
     # Verify the response status code
     assert response.status_code == status.HTTP_404_NOT_FOUND, \
         f"Expected status 404, but got {response.status_code}"
+
+
+def test_read_user_applied_jobs(test_user_applied_job, test_user):
+    _, token = access_token()
+
+    response = client.get("/jobs/applied", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == status.HTTP_200_OK, f"Expected 200 OK, but got {response.status_code}"
+
+    json_data = response.json()
+    assert "message" in json_data
+    assert "data" in json_data
+    assert "page" in json_data["data"]
+    assert "page_size" in json_data["data"]
+    assert "applied_jobs_count" in json_data["data"]
+    assert "total_pages" in json_data["data"]
+    assert "jobs" in json_data["data"]
+
+    # Ensure that jobs is a list
+    assert isinstance(json_data["data"]["jobs"], list)
+
+
+def test_read_applied_jobs_user_dont_exist(test_user_applied_job):
+    _, token = access_token()
+
+    response = client.get("/jobs/applied", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == status.HTTP_404_NOT_FOUND, f"Expected 404 OK, but got {response.status_code}"
+    assert response.json()["detail"] == "User not found", "Detail mismatch"

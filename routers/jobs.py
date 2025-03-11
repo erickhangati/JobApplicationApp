@@ -96,6 +96,45 @@ async def read_jobs(
     )
 
 
+@router.get("/jobs/applied", response_model=List[JobResponse],
+            status_code=status.HTTP_200_OK)
+async def read_applied_jobs(
+        db: db_dependency,
+        user: user_dependency,
+        page: int = Query(1, ge=1, description="Page number (starts at 1)"),
+        page_size: int = Query(10, ge=1, le=100,
+                               description="Number of jobs per page (max: 100)")):
+    user = db.query(Users).filter(Users.id == user.get('id')).first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="User not found")
+
+    offset = (page - 1) * page_size
+    applied_jobs = db.query(AppliedJobs).filter(AppliedJobs.user_id == user.id).limit(
+        page_size).offset(offset).all()
+
+    applied_jobs_total = len(applied_jobs)
+    total_pages = (applied_jobs_total + page_size - 1) // page_size
+
+    response_data = {
+        "page": page,
+        "page_size": page_size,
+        "applied_jobs_count": applied_jobs_total,  # Jobs that match search filters
+        "total_pages": total_pages,  # Total pages after filtering
+        "jobs": [AppliedJobResponse.model_validate(job).model_dump(mode="json") for job in
+                 applied_jobs]
+    }
+
+    # Return standardized JSON response
+    return create_response(
+        message="Applied Jobs retrieved successfully" if applied_jobs_total > 0 else
+        "No applied jobs found",
+        data=response_data,
+        status_code=status.HTTP_200_OK
+    )
+
+
 @router.get("/jobs/{job_id}", response_model=JobResponse, status_code=status.HTTP_200_OK)
 async def read_job(
         db: db_dependency,
