@@ -573,3 +573,139 @@ def test_update_job_not_found(test_user):
     # Verify that the response returns a 404 Not Found error
     assert response.status_code == status.HTTP_404_NOT_FOUND, f"Expected 404, but got {response.status_code}"
     assert response.json()["detail"] == "Job not found", "Detail mismatch"
+
+
+def test_delete_job(test_job, test_user):
+    """
+    Test deleting a job listing.
+
+    Ensures that an authenticated ADMIN user can successfully delete a job.
+    The test sends a DELETE request to the `/jobs/{job_id}` endpoint and
+    verifies that the response status code is 204 (No Content).
+
+    Args:
+        test_job (Jobs): A pytest fixture providing a pre-existing job object.
+        test_user (Users): A pytest fixture providing a pre-existing admin user.
+
+    Assertions:
+        - The response status should be 204 (No Content).
+        - The job should be removed from the database.
+    """
+
+    # Generate an access token for the test user
+    _, token = access_token()
+
+    # Send DELETE request to remove the job
+    response = client.delete(
+        f"/jobs/{test_job.id}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Verify the response status code is 204 No Content
+    assert response.status_code == status.HTTP_204_NO_CONTENT, \
+        f"Expected 204, but got {response.status_code}"
+
+    # Verify the job has been removed from the database
+    db = TestSessionLocal()
+    deleted_job = db.query(Jobs).filter(Jobs.id == test_job.id).first()
+    assert deleted_job is None, "Job was not successfully deleted"
+    db.close()
+
+
+def test_delete_job_user_not_found(test_job):
+    """
+    Test deleting a job when the user does not exist.
+
+    This test ensures that if a user who is not present in the database
+    attempts to delete a job, the API returns a 404 (Not Found) error.
+
+    Args:
+        test_job (Jobs): A pytest fixture providing a pre-existing job object.
+
+    Assertions:
+        - The response status should be 404 (Not Found).
+        - The error message should indicate that the user was not found.
+    """
+
+    # Generate an access token for a non-existent user
+    _, token = access_token()
+
+    # Send DELETE request to attempt job deletion
+    response = client.delete(
+        f"/jobs/{test_job.id}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Verify response status is 404 Not Found
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected 404, but got {response.status_code}"
+
+    # Verify response detail message
+    assert response.json()["detail"] == "User not found", "Detail mismatch"
+
+
+@pytest.mark.parametrize("test_user", ["USER"], indirect=True)
+def test_delete_job_user_not_admin(test_job, test_user):
+    """
+    Test deleting a job when the user is not an admin.
+
+    This test ensures that if a regular user (non-admin) attempts to delete
+    a job, the API returns a 403 (Forbidden) error.
+
+    Args:
+        test_job (Jobs): A pytest fixture providing a pre-existing job object.
+        test_user (Users): A pytest fixture providing a non-admin user object.
+
+    Assertions:
+        - The response status should be 403 (Forbidden).
+        - The error message should indicate that the user lacks permission.
+    """
+
+    # Generate an access token for a non-admin user
+    _, token = access_token()
+
+    # Send DELETE request to attempt job deletion
+    response = client.delete(
+        f"/jobs/{test_job.id}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Verify response status is 403 Forbidden
+    assert response.status_code == status.HTTP_403_FORBIDDEN, \
+        f"Expected 403, but got {response.status_code}"
+
+    # Verify response detail message
+    assert response.json()["detail"] == "You do not have permission to delete jobs", \
+        "Detail mismatch"
+
+
+def test_delete_job_not_found(test_user):
+    """
+    Test deleting a job that does not exist.
+
+    This test ensures that attempting to delete a non-existent job returns
+    a 404 (Not Found) response.
+
+    Args:
+        test_user (Users): A pytest fixture providing a pre-existing user object.
+
+    Assertions:
+        - The response status should be 404 (Not Found).
+        - The error message should indicate that the job was not found.
+    """
+
+    # Generate an access token for the test user
+    _, token = access_token()
+
+    # Send DELETE request for a non-existent job ID (assuming ID 1 does not exist)
+    response = client.delete(
+        "/jobs/1",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Verify response status is 404 Not Found
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected 404, but got {response.status_code}"
+
+    # Verify response detail message
+    assert response.json()["detail"] == "Job not found", "Detail mismatch"

@@ -371,3 +371,49 @@ async def update_job(
     # Commit changes to the database
     db.commit()
     db.refresh(job)
+
+
+@router.delete("/jobs/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_job(
+        db: db_dependency,
+        user_request: user_dependency,
+        job_id: int = Path(gt=0, description="Job ID (must be greater than 0)")
+):
+    """
+    Deletes a job listing.
+
+    - Only ADMIN users can delete jobs.
+    - Ensures that the job exists before deleting.
+
+    Args:
+        db (Session): Database session dependency.
+        user_request (dict): Authenticated user details.
+        job_id (int): ID of the job to be deleted.
+
+    Raises:
+        HTTPException 404: If the user or job is not found.
+        HTTPException 403: If the user is not an admin.
+
+    Returns:
+        None (204 No Content)
+    """
+
+    # Retrieve the authenticated user
+    user = db.query(Users).filter(Users.id == user_request.get("id")).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="User not found")
+
+    # Ensure only admins can delete jobs
+    if user.role != 'ADMIN':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="You do not have permission to delete jobs")
+
+    # Fetch the job to be deleted
+    job = db.query(Jobs).filter(Jobs.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+
+    # Delete the job and commit the transaction
+    db.delete(job)
+    db.commit()

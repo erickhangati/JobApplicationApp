@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Test] Added test for job update">
+    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Update] Improved the update job tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routers/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/jobs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testdb.db" beforeDir="false" afterPath="$PROJECT_DIR$/testdb.db" afterDir="false" />
@@ -95,7 +95,8 @@
       <workItem from="1741573836465" duration="15891000" />
       <workItem from="1741618803842" duration="10934000" />
       <workItem from="1741660121952" duration="24186000" />
-      <workItem from="1741691250989" duration="3416000" />
+      <workItem from="1741691250989" duration="5008000" />
+      <workItem from="1741705523834" duration="3198000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -289,7 +290,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741684465671</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="[Update] Improved the update job tests">
+      <option name="closed" value="true" />
+      <created>1741704146325</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1741704146325</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -323,6 +332,7 @@
     <MESSAGE value="[Tes] Added test for create job route" />
     <MESSAGE value="[Feature] Added update job route" />
     <MESSAGE value="[Test] Added test for job update" />
-    <option name="LAST_COMMIT_MESSAGE" value="[Test] Added test for job update" />
+    <MESSAGE value="[Update] Improved the update job tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="[Update] Improved the update job tests" />
   </component>
 </project>
