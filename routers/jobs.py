@@ -307,3 +307,67 @@ async def create_job(
         location=f"/jobs/{job.id}",
         status_code=status.HTTP_201_CREATED
     )
+
+
+@router.put("/jobs/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_job(
+        db: db_dependency,
+        user_request: user_dependency,
+        job_request: JobRequest,
+        job_id: int = Path(gt=0, description="Job ID (must be greater than 0)")
+):
+    """
+    Updates an existing job listing.
+
+    This route allows an admin user to update the details of an existing job listing.
+
+    Args:
+        db (Session): Database session dependency.
+        user_request (dict): User details from JWT token.
+        job_request (JobRequest): The updated job details.
+        job_id (int): The ID of the job to be updated.
+
+    Returns:
+        None: Returns a 204 No Content response upon successful update.
+
+    Raises:
+        HTTPException: If the user is not found (404).
+        HTTPException: If the user is not an admin (403).
+        HTTPException: If the job is not found (404).
+    """
+
+    # Fetch the user making the request
+    user = db.query(Users).filter(Users.id == user_request.get("id")).first()
+
+    # Validate user existence
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Ensure the user has admin privileges
+    if user.role != 'ADMIN':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action"
+        )
+
+    # Fetch the job to be updated
+    job = db.query(Jobs).filter(Jobs.id == job_id).first()
+
+    # Validate job existence
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job not found"
+        )
+
+    # Update job fields dynamically
+    job_data = job_request.model_dump()
+    for key, value in job_data.items():
+        setattr(job, key, value)
+
+    # Commit changes to the database
+    db.commit()
+    db.refresh(job)
