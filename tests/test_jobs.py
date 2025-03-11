@@ -402,14 +402,72 @@ def test_create_job_user_dont_exist(test_job):
 
 
 @pytest.mark.parametrize("test_user", ["USER"], indirect=True)
-def test_create_job_user_not_admin(test_job, test_user):
+def test_create_job_user_not_admin(test_user):
+    """
+    Test that a non-admin user cannot create a job.
+
+    This test ensures that when a user with the role "USER" attempts to create a job,
+    the request is denied with a 403 Forbidden response.
+
+    Args:
+        test_user_role: Fixture that dynamically sets the user role.
+
+    Assertions:
+        - The response status code should be 403 (Forbidden).
+        - The response should contain the correct error detail.
+    """
+
+    # Generate an access token for the non-admin user
     _, token = access_token()
+
+    # Create a sample job payload
     job = job_sample()
+
+    # Attempt to create a job
     response = client.post(
         "/jobs",
         headers={"Authorization": f"Bearer {token}"},
         json=job
     )
-    assert response.status_code == status.HTTP_403_FORBIDDEN, f"Expected 403 OK, but got {response.status_code}"
+
+    # Validate the response
+    assert response.status_code == status.HTTP_403_FORBIDDEN, \
+        f"Expected 403, but got {response.status_code}"
+
     assert response.json()[
-               "detail"] == "You do not have permission to perform this action", f"Detail mismatch"
+               "detail"] == "You do not have permission to perform this action", \
+        "Detail mismatch"
+
+
+def test_update_job(test_job, test_user):
+    """
+    Test updating an existing job listing.
+
+    This test verifies that an authenticated admin user can successfully update
+    an existing job listing using a PUT request.
+
+    Args:
+        test_job: Fixture providing a pre-existing job instance.
+        test_user: Fixture providing an authenticated user instance.
+
+    Assertions:
+        - The response status code should be 204 (No Content), indicating a successful
+        update.
+    """
+
+    # Generate an access token for authentication
+    _, token = access_token()
+
+    # Create a sample job update payload
+    job = job_sample()
+
+    # Send a PUT request to update the job
+    response = client.put(
+        f"/jobs/{test_job.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json=job
+    )
+
+    # Validate the response
+    assert response.status_code == status.HTTP_204_NO_CONTENT, \
+        f"Expected 204, but got {response.status_code}"

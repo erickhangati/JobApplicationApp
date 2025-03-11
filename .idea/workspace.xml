@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Tes] Added test for create job route">
+    <list default="true" id="f59fd930-91b5-4969-a144-1a032a89cf5c" name="Changes" comment="[Feature] Added update job route">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routers/jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/routers/jobs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testdb.db" beforeDir="false" afterPath="$PROJECT_DIR$/testdb.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_jobs.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_jobs.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +92,7 @@
       <workItem from="1741521589287" duration="23508000" />
       <workItem from="1741573836465" duration="15891000" />
       <workItem from="1741618803842" duration="10934000" />
-      <workItem from="1741660121952" duration="18530000" />
+      <workItem from="1741660121952" duration="20298000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -269,7 +270,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741679924589</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="[Feature] Added update job route">
+      <option name="closed" value="true" />
+      <created>1741683009169</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1741683009169</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -301,6 +310,7 @@
     <MESSAGE value="[Test] Added test for read applied jobs route" />
     <MESSAGE value="[Feature] Added create job route" />
     <MESSAGE value="[Tes] Added test for create job route" />
-    <option name="LAST_COMMIT_MESSAGE" value="[Tes] Added test for create job route" />
+    <MESSAGE value="[Feature] Added update job route" />
+    <option name="LAST_COMMIT_MESSAGE" value="[Feature] Added update job route" />
   </component>
 </project>
