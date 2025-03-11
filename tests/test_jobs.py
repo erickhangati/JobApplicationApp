@@ -471,3 +471,105 @@ def test_update_job(test_job, test_user):
     # Validate the response
     assert response.status_code == status.HTTP_204_NO_CONTENT, \
         f"Expected 204, but got {response.status_code}"
+
+
+def test_update_job_user_not_found(test_job):
+    """
+    Test updating a job when the user does not exist.
+
+    This test ensures that if a user who is not found in the database
+    attempts to update a job, the API returns a 404 Not Found error.
+
+    Args:
+        test_job: A pytest fixture representing a pre-existing job.
+
+    Assertions:
+        - The response status code should be 404 (Not Found).
+        - The response detail message should indicate "User not found".
+    """
+
+    # Generate an access token (this user does not exist in the DB)
+    _, token = access_token()
+
+    # Create a job payload using the job_sample utility function
+    job = job_sample()
+
+    # Send a PUT request to update the job
+    response = client.put(
+        f"/jobs/{test_job.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json=job
+    )
+
+    # Verify the response status code and error message
+    assert response.status_code == status.HTTP_404_NOT_FOUND, f"Expected 404, but got {response.status_code}"
+    assert response.json()["detail"] == "User not found", "Detail mismatch"
+
+
+@pytest.mark.parametrize("test_user", ["USER"], indirect=True)
+def test_update_job_user_not_admin(test_job, test_user):
+    """
+    Test updating a job as a non-admin user.
+
+    This test verifies that if a user with a non-admin role (e.g., "USER")
+    attempts to update a job, the API returns a 403 Forbidden error.
+
+    Args:
+        test_job: A pytest fixture representing a pre-existing job.
+        test_user: A non-admin user fixture (set via parametrize).
+
+    Assertions:
+        - The response status code should be 403 (Forbidden).
+        - The response detail message should indicate lack of permission.
+    """
+
+    # Generate an access token for the non-admin user
+    _, token = access_token()
+
+    # Create a job payload using the job_sample utility function
+    job = job_sample()
+
+    # Send a PUT request to update the job
+    response = client.put(
+        f"/jobs/{test_job.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json=job
+    )
+
+    # Verify the response status code and error message
+    assert response.status_code == status.HTTP_403_FORBIDDEN, f"Expected 403, but got {response.status_code}"
+    assert response.json()[
+               "detail"] == "You do not have permission to perform this action", "Detail mismatch"
+
+
+def test_update_job_not_found(test_user):
+    """
+    Test updating a non-existent job.
+
+    This test ensures that attempting to update a job with an ID that does not exist
+    in the database results in a 404 Not Found response.
+
+    Args:
+        test_user: A pytest fixture representing a valid authenticated user.
+
+    Assertions:
+        - The response status code should be 404 (Not Found).
+        - The response detail message should indicate that the job was not found.
+    """
+
+    # Generate an access token for the authenticated user
+    _, token = access_token()
+
+    # Create a job payload using the job_sample utility function
+    job = job_sample()
+
+    # Attempt to update a job with ID 1, assuming it does not exist
+    response = client.put(
+        "/jobs/1",
+        headers={"Authorization": f"Bearer {token}"},
+        json=job
+    )
+
+    # Verify that the response returns a 404 Not Found error
+    assert response.status_code == status.HTTP_404_NOT_FOUND, f"Expected 404, but got {response.status_code}"
+    assert response.json()["detail"] == "Job not found", "Detail mismatch"
