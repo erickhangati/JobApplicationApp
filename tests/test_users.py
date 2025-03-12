@@ -1,8 +1,9 @@
+import pytest
 from starlette import status
 from models import Users
 from .conftest import client, TestSessionLocal, test_user
 from routers.auth import bcrypt_context
-from .utils import user_sample
+from .utils import user_sample, access_token
 
 
 def test_create_user(test_user):
@@ -67,3 +68,68 @@ def test_create_user_exists(test_user):
 
     # Assertions for response validation
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_users(test_user):
+    """
+    Test retrieving a paginated list of users.
+
+    Ensures that an authenticated admin user can successfully retrieve a list of users.
+    Validates the response structure, status code, and success message.
+
+    Args:
+        test_user: A pytest fixture providing a pre-existing authenticated user.
+
+    Assertions:
+        - The response status code should be 200 (OK).
+        - The response should contain a success message.
+        - The response should include a "data" field with user details.
+    """
+
+    # Generate an access token for the test user
+    _, token = access_token()
+
+    # Send GET request to retrieve users with authorization token
+    response = client.get('/users', headers={'Authorization': f'Bearer {token}'})
+
+    # Validate response status
+    assert response.status_code == status.HTTP_200_OK, f"Expected 200, but got {response.status_code}"
+
+    # Validate success message
+    assert response.json()[
+               "message"] == "Users retrieved successfully", "Message mismatch"
+
+    # Ensure response contains the expected data field
+    assert "data" in response.json(), "Missing 'data' field in response"
+
+
+def test_users_not_user():
+    """
+    Test retrieving users when the requester does not exist in the database.
+
+    Ensures that if an authenticated token is used but the associated user does not exist,
+    the API correctly returns a 404 Not Found error.
+
+    Assertions:
+        - The response status code should be 404 (Not Found).
+        - The response should contain the appropriate error detail message.
+    """
+
+    # Generate an access token for a non-existent user
+    _, token = access_token()
+
+    # Attempt to retrieve users with an invalid or missing user entry
+    response = client.get('/users', headers={'Authorization': f'Bearer {token}'})
+
+    # Validate response status
+    assert response.status_code == status.HTTP_404_NOT_FOUND, f"Expected 404, but got {response.status_code}"
+
+    # Validate error message
+    assert response.json() == {"detail": "User not found"}, "Unexpected response detail"
+
+
+@pytest.mark.parametrize("test_user", ["USER"], indirect=True)
+def test_users_not_admin(test_user):
+    _, token = access_token()
+    response = client.get('/users', headers={'Authorization': f'Bearer {token}'})
+    assert response.status_code == status.HTTP_403_FORBIDDEN, f"Expected 403, but got {response.status_code}"

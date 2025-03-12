@@ -1,17 +1,109 @@
 """
 users.py - Handles user registration and related operations in the FastAPI application.
 """
+from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from starlette import status
 
-from .auth import bcrypt_context
-from models import UserRequest, Users, UserRequestBase
+from .auth import bcrypt_context, user_dependency
+from models import UserRequest, Users, UserRequestBase, UserResponse
 from database import db_dependency
 from utils import create_response
 
 # Create a router for user-related endpoints
 router = APIRouter(tags=["users"])
+
+
+@router.get("/users", response_model=List[UserResponse], status_code=status.HTTP_200_OK)
+async def read_users(
+        db: db_dependency,
+        user_request: user_dependency,
+        first_name: Optional[str] = Query(None, min_length=3,
+                                          description="Filter users by first name"),
+        last_name: Optional[str] = Query(None, min_length=3,
+                                         description="Filter users by last name"),
+        page: int = Query(1, ge=1, description="Page number (starts at 1)"),
+        page_size: int = Query(10, ge=1, le=100,
+                               description="Number of users per page (max: 100)")
+):
+    """
+    Retrieves a paginated list of users with optional filtering.
+
+    This endpoint allows an admin user to retrieve users based on filters like first name and last name.
+    Supports pagination for efficient data retrieval.
+
+    Args:
+        db (Session): Database session dependency.
+        user_request (dict): The authenticated user's details.
+        first_name (Optional[str]): Filter users by first name (case-insensitive).
+        last_name (Optional[str]): Filter users by last name (case-insensitive).
+        page (int): The page number for pagination (default is 1).
+        page_size (int): The number of users per page (default is 10, max is 100).
+
+    Returns:
+        JSONResponse: A paginated response containing user details and metadata.
+
+    Raises:
+        HTTPException: If the requesting user is not found (404) or does not have admin privileges (403).
+    """
+
+    # Fetch the requesting user from the database
+    requesting_user = db.query(Users).filter(Users.id == user_request.get('id')).first()
+
+    # Validate user existence
+    if not requesting_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Ensure only admins can retrieve users
+    if requesting_user.role != 'ADMIN':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action"
+        )
+
+    # Initialize query
+    query = db.query(Users)
+
+    # Apply filtering
+    if first_name:
+        query = query.filter(Users.first_name.ilike(f"%{first_name}%"))
+    if last_name:
+        query = query.filter(Users.last_name.ilike(f"%{last_name}%"))
+
+    # Count total filtered users
+    filtered_user_count = query.count()
+
+    # Calculate pagination offset
+    offset = (page - 1) * page_size
+
+    # Fetch paginated users
+    users = query.limit(page_size).offset(offset).all()
+
+    # Count total users in the system
+    total_users = db.query(Users).count()
+    total_pages = (filtered_user_count + page_size - 1) // page_size  # Ceiling division
+
+    # Prepare response data
+    response_data = {
+        "page": page,
+        "page_size": page_size,
+        "total_users": total_users,  # Total users in the system
+        "filtered_user_count": filtered_user_count,  # Users matching filters
+        "total_pages": total_pages,  # Number of pages based on filtered results
+        "users": [UserResponse.model_validate(user).model_dump(mode="json") for user in
+                  users]
+    }
+
+    # Return standardized JSON response
+    return create_response(
+        message="Users retrieved successfully",
+        data=response_data,
+        status_code=status.HTTP_200_OK
+    )
 
 
 @router.post(

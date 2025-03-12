@@ -228,6 +228,20 @@ class UserRequest(UserRequestBase):
     }
 
 
+class UserResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    username: str
+    email: str
+    hashed_password: str
+    role: str
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(min_length=3, description='Old password')
     new_password: str = Field(min_length=3, description='New password')
