@@ -38,10 +38,10 @@ def job_sample():
     }
 
 
-def access_token():
+def access_token(user_id: int = 1):
     payload = {
         "username": "jane_doe",
-        "id": 1,
+        "id": user_id,
         "role": "ADMIN",
         "expire": timedelta(hours=1),  # Expiration time (1 hour)
     }

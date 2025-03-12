@@ -160,3 +160,66 @@ def test_users_not_admin(test_user):
     assert response.json() == {
         "detail": "You do not have permission to perform this action"}, \
         "Unexpected response detail"
+
+
+def test_delete_user(test_user):
+    """
+    Test case for deleting a user.
+
+    Ensures that an authenticated **admin user** can successfully delete a user
+    and that the user is removed from the database.
+
+    Args:
+        test_user: A pytest fixture providing a pre-existing user.
+
+    Assertions:
+        - The response status code should be **204 No Content**.
+        - The user should no longer exist in the database after deletion.
+    """
+
+    # Generate an access token for the admin user
+    _, token = access_token()
+
+    # Send DELETE request to remove the user
+    response = client.delete(
+        f"/users/{test_user.id}",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Assert that the request was successful
+    assert response.status_code == status.HTTP_204_NO_CONTENT, \
+        f"Expected 204, but got {response.status_code}"
+
+    # Verify that the user no longer exists in the database
+    db = TestSessionLocal()
+    user = db.query(Users).filter(Users.id == test_user.id).first()
+    assert user is None, "User was deleted successfully"
+
+
+def test_delete_user_not_user():
+    """
+    Test case for deleting a non-existent user.
+
+    Ensures that attempting to delete a user that does not exist results
+    in a **404 Not Found** response.
+
+    Assertions:
+        - The response status code should be **404 Not Found**.
+        - The response should contain the appropriate error message.
+    """
+
+    # Generate an access token for authentication
+    _, token = access_token()
+
+    # Send DELETE request to attempt removing a non-existent user (ID: 1)
+    response = client.delete(
+        "/users/1",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Assert that the response status code is 404
+    assert response.status_code == status.HTTP_404_NOT_FOUND, \
+        f"Expected 404, but got {response.status_code}"
+
+    # Assert that the response detail message matches the expected output
+    assert response.json() == {"detail": "User not found"}, "Unexpected response detail"

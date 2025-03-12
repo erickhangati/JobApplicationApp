@@ -41,29 +41,6 @@ def override_get_current_user():
     }
 
 
-# @pytest.fixture
-# def test_user():
-#     user = Users(
-#         first_name="Jane",
-#         last_name="Doe",
-#         email="janedoe@mail.com",
-#         username="jane_doe",
-#         hashed_password=bcrypt_context.hash("test1234"),
-#         role="ADMIN"
-#     )
-#
-#     db = TestSessionLocal()
-#     db.add(user)
-#     db.commit()
-#
-#     try:
-#         yield user
-#     finally:
-#         with engine.connect() as connection:
-#             connection.execute(text('DELETE FROM users'))
-#             connection.commit()
-#             db.close()
-
 @pytest.fixture
 def test_user(request):
     """

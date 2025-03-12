@@ -211,7 +211,7 @@ async def delete_user(
         )
 
     # Ensure the requester is an admin or is a user not trying to delete another user
-    if user_request.get("role") != "ADMIN" or user_request.get("id") != user_id:
+    if user_request.get("role") != "ADMIN" and user_request.get("id") != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to perform this action"
