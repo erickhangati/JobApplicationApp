@@ -130,6 +130,33 @@ def test_users_not_user():
 
 @pytest.mark.parametrize("test_user", ["USER"], indirect=True)
 def test_users_not_admin(test_user):
+    """
+    Test case for restricting non-admin users from retrieving the user list.
+
+    Ensures that an authenticated **non-admin** user receives a **403 Forbidden** response
+    when attempting to access the `/users` endpoint.
+
+    Args:
+        test_user: A pytest fixture providing a non-admin user.
+
+    Assertions:
+        - The response status code should be **403 Forbidden**.
+    """
+
+    # Generate an access token for the non-admin user
     _, token = access_token()
-    response = client.get('/users', headers={'Authorization': f'Bearer {token}'})
-    assert response.status_code == status.HTTP_403_FORBIDDEN, f"Expected 403, but got {response.status_code}"
+
+    # Attempt to fetch users with a non-admin token
+    response = client.get(
+        "/users",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # Verify that the request is forbidden
+    assert response.status_code == status.HTTP_403_FORBIDDEN, \
+        f"Expected 403, but got {response.status_code}"
+
+    # Validate error message
+    assert response.json() == {
+        "detail": "You do not have permission to perform this action"}, \
+        "Unexpected response detail"

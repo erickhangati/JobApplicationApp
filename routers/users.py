@@ -3,7 +3,7 @@ users.py - Handles user registration and related operations in the FastAPI appli
 """
 from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Path
 from starlette import status
 
 from .auth import bcrypt_context, user_dependency
@@ -173,3 +173,51 @@ async def create_user(db: db_dependency, request: UserRequest):
         status_code=status.HTTP_201_CREATED,
         location=f"/users/{user.id}"
     )
+
+
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(
+        db: db_dependency,
+        user_request: user_dependency,
+        user_id: int = Path(gt=0, description="User ID (must be greater than 0)")
+):
+    """
+    Deletes a user from the database.
+
+    Only an **ADMIN** can delete users, and a user **cannot delete themselves**.
+
+    Args:
+        db (Session): Database session dependency.
+        user_request (dict): The authenticated user's data extracted from JWT.
+        user_id (int): The ID of the user to be deleted.
+
+    Raises:
+        HTTPException (404): If the user does not exist.
+        HTTPException (403): If the requester is not an admin or tries to delete
+        another user.
+
+    Returns:
+        None: Successfully deletes the user and returns a 204 No Content response.
+    """
+
+    # Retrieve the user to be deleted from the database
+    user = db.query(Users).filter(Users.id == user_id).first()
+
+    # If the user does not exist, raise a 404 Not Found error
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Ensure the requester is an admin or is a user not trying to delete another user
+    if user_request.get("role") != "ADMIN" or user_request.get("id") != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action"
+        )
+
+    # Delete the user and commit the transaction
+    db.delete(user)
+    db.commit()
+
